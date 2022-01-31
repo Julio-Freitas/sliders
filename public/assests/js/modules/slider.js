@@ -56,6 +56,30 @@ export default class SliderJS {
     this.wrapper.removeEventListener(this.checkEventType(event), this.onMove);
   }
 
+  getSliderPosition(element) {
+    const margin = (this.wrapper.offsetWidth - element.offsetWidth) / 2;
+    return -(element.offsetLeft - margin);
+  }
+
+  checkIndex(index) {
+    return !!this.sliderArray[index];
+  }
+
+  sliderIndexNav(index) {
+    this.indexNav = {
+      prev: index--,
+      active: index,
+      next: index++,
+    };
+  }
+
+  sliderConfig() {
+    this.sliderArray = [...this.slider.children].map((element) => ({
+      element,
+      position: this.getSliderPosition(element),
+    }));
+  }
+
   addSliderEvents() {
     const eventsStart = ["mousedown", "touchstart"];
     const eventsEnd = ["mouseup", "touchend"];
@@ -69,8 +93,27 @@ export default class SliderJS {
     );
   }
 
+  resetSlider() {
+    this.moveSlider(this.sliderArray[0].position);
+    this.distance.finalPosition = this.sliderArray[0].position;
+  }
+
+  changeSlider(index) {
+    if (this.checkIndex(index)) {
+      const activeSlider = this.sliderArray[index].position;
+      this.moveSlider(activeSlider);
+      this.sliderIndexNav(index);
+      this.distance.finalPosition = activeSlider;
+      return;
+    }
+
+    this.resetSlider();
+  }
+
   init() {
     this.addSliderEvents();
+    this.sliderConfig();
+    this.changeSlider(0);
     return this;
   }
 }
